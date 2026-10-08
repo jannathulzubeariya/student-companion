@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Student Companion - Study smarter. Prepare better. Learn faster.</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+              glow: '#38bdf8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Marked parser for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* Custom Glassmorphism & Scrollbar styling */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .prose code {
+      background-color: #1e293b;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      color: #38bdf8;
+    }
+    .prose pre code {
+      background-color: transparent;
+      padding: 0;
+      color: inherit;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans bg-slate-950 text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+  <header class="sticky top-0 z-40 glass-nav h-16 flex items-center justify-between px-4 lg:px-8 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <button id="mobileMenuBtn" class="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 focus:outline-none">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-tight flex items-center gap-2">
+            AI Student Companion
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest font-bold">PRO</span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Study smarter. Prepare better. Learn faster.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div id="statusBadge" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Gemini AI Ready
+      </div>
+      <button onclick="switchTab('dashboard')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5 font-medium">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>Dashboard</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-1 flex overflow-hidden">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static flex flex-col pt-16 lg:pt-0">
+      <div class="p-4 flex-1 overflow-y-auto space-y-1">
+        <div class="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Navigation</div>
+        
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-sky-400 bg-sky-500/10 border border-sky-500/20">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <div class="pt-4 px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Academic Tools</div>
+
+        <button onclick="switchTab('study')" data-tab="study" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="book-open" class="w-5 h-5 text-amber-400"></i>
+          <span>Study Assistant</span>
+        </button>
+
+        <button onclick="switchTab('assignment')" data-tab="assignment" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>
+          <span>Assignment Helper</span>
+        </button>
+
+        <button onclick="switchTab('quiz')" data-tab="quiz" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="brain-circuit" class="w-5 h-5 text-purple-400"></i>
+          <span>Quiz Generator</span>
+        </button>
+
+        <button onclick="switchTab('presentation')" data-tab="presentation" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="presentation" class="w-5 h-5 text-rose-400"></i>
+          <span>Presentation Helper</span>
+        </button>
+
+        <button onclick="switchTab('planner')" data-tab="planner" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="calendar" class="w-5 h-5 text-emerald-400"></i>
+          <span>Study Planner</span>
+        </button>
+
+        <button onclick="switchTab('coding')" data-tab="coding" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
+          <i data-lucide="code-2" class="w-5 h-5 text-cyan-400"></i>
+          <span>Coding Helper</span>
+        </button>
+      </div>
+
+      <div class="p-4 border-t border-slate-800">
+        <div class="glass-card rounded-xl p-3 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold">SC</div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-semibold truncate text-slate-200">Student Workspace</p>
+            <p class="text-[10px] text-slate-400 truncate">Academic Edition</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-20 bg-slate-950/80 backdrop-blur-sm hidden lg:hidden"></div>
+
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl text-slate-200 text-sm">
+          <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400" id="toastIcon"></i>
+          <span id="toastMsg">Message here</span>
+        </div>
+      </div>
+
+      <!-- DASHBOARD TAB -->
+      <section id="tab-dashboard" class="tab-content space-y-8">
+        <div class="relative overflow-hidden rounded-2xl glass-card p-6 sm:p-10 border border-slate-800">
+          <div class="absolute -top-24 -right-24 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 mb-4">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Academic Suite
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3">
+              Master Your Academic Journey with <span class="gradient-text">AI Power</span>
+            </h2>
+            <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+              Elevate your grades, organize study schedules, prepare engaging presentations, and master programming concepts using structured AI tools.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Card 1 -->
+          <div onclick="switchTab('study')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4 text-amber-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="book-open" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">📚 Study Assistant</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Understand difficult topics easily with tailored explanations, revision notes, and customized practice questions.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-amber-400 gap-1 pt-2">
+              <span>Start Studying</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div onclick="switchTab('assignment')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 text-blue-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="file-text" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">📝 Assignment Helper</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Organize and develop your academic essays, outlines, arguments, pros/cons, and reference recommendations.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-blue-400 gap-1 pt-2">
+              <span>Draft Assignment</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div onclick="switchTab('quiz')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-purple-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4 text-purple-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">🧠 Quiz Generator</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Test your knowledge and track your score with instant dynamic multiple-choice quizzes and explanations.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-purple-400 gap-1 pt-2">
+              <span>Take Quiz</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div onclick="switchTab('presentation')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-rose-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-4 text-rose-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="presentation" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-rose-400 transition-colors">🎤 Presentation Helper</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Prepare confident presentations with slide structures, conversational speaker notes, and Q&A prep.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-rose-400 gap-1 pt-2">
+              <span>Create Slides</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div onclick="switchTab('planner')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">📅 Study Planner</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Plan your study time effectively with prioritized custom timetables, break schedules, and exam countdowns.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-emerald-400 gap-1 pt-2">
+              <span>Build Plan</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div onclick="switchTab('coding')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all duration-300 group cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400 group-hover:scale-110 transition-transform">
+                <i data-lucide="code-2" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">💻 Coding Helper</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-4">Learn programming through simple explanations, syntax breakdown, common pitfall analysis, and challenges.</p>
+            </div>
+            <div class="flex items-center text-xs font-semibold text-cyan-400 gap-1 pt-2">
+              <span>Debug / Learn Code</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDY ASSISTANT TAB -->
+      <section id="tab-study" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="book-open" class="text-amber-400"></i> Study Assistant
+            </h2>
+            <p class="text-slate-400 text-sm">Deconstruct complex topics into clear, readable concepts and revision notes.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 h-fit">
+            <form id="studyForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Subject *</label>
+                <input type="text" id="studySubject" placeholder="e.g. Organic Chemistry, Microeconomics" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition" required>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Topic *</label>
+                <input type="text" id="studyTopic" placeholder="e.g. Nucleophilic Substitution, Inflation Rates" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition" required>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Level</label>
+                  <select id="studyLevel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate" selected>Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Style</label>
+                  <select id="studyStyle" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                    <option value="Simple">Simple</option>
+                    <option value="Detailed" selected>Detailed</option>
+                    <option value="Exam-oriented">Exam-oriented</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" id="studySubmitBtn" class="flex-1 gradient-bg hover:opacity-90 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Explanation
+                </button>
+                <button type="button" onclick="clearForm('studyForm', 'studyResult')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 min-h-[400px] flex flex-col justify-between">
+            <div id="studyResult" class="prose prose-invert max-w-none text-slate-300 text-sm space-y-4">
+              <div class="text-center py-20 text-slate-500">
+                <i data-lucide="book-open-check" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p class="font-medium">Enter a subject & topic to generate your structured learning guide.</p>
+              </div>
+            </div>
+            <div id="studyActions" class="hidden border-t border-slate-800 pt-4 mt-6 flex items-center justify-between">
+              <button onclick="copyToClipboard('studyResult')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Output
+              </button>
+              <button onclick="document.getElementById('studyForm').dispatchEvent(new Event('submit'))" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Regenerate
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ASSIGNMENT HELPER TAB -->
+      <section id="tab-assignment" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-text" class="text-blue-400"></i> Assignment Helper
+            </h2>
+            <p class="text-slate-400 text-sm">Generate structured assignment frameworks, key insights, and academic section outlines.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 h-fit">
+            <form id="assignmentForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Subject *</label>
+                <input type="text" id="assignSubject" placeholder="e.g. Modern History, Ethics" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition" required>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Assignment Title / Topic *</label>
+                <input type="text" id="assignTopic" placeholder="e.g. Impact of AI on Data Privacy" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition" required>
+              </div>
+
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Length</label>
+                  <select id="assignLength" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition">
+                    <option value="Short (500 words)">Short</option>
+                    <option value="Medium (1000 words)" selected>Medium</option>
+                    <option value="Long (2000+ words)">Long</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Level</label>
+                  <select id="assignLevel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition">
+                    <option value="High School">High School</option>
+                    <option value="Undergraduate" selected>Undergrad</option>
+                    <option value="Postgraduate">Postgrad</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Style</label>
+                  <select id="assignStyle" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition">
+                    <option value="Analytical">Analytical</option>
+                    <option value="Argumentative" selected>Argumentative</option>
+                    <option value="Descriptive">Descriptive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" id="assignSubmitBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Draft Outline
+                </button>
+                <button type="button" onclick="clearForm('assignmentForm', 'assignmentResult')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 min-h-[400px] flex flex-col justify-between">
+            <div id="assignmentResult" class="prose prose-invert max-w-none text-slate-300 text-sm space-y-4">
+              <div class="text-center py-20 text-slate-500">
+                <i data-lucide="file-check-2" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p class="font-medium">Enter assignment details to build a detailed structure and guide.</p>
+              </div>
+            </div>
+            <div id="assignmentActions" class="hidden border-t border-slate-800 pt-4 mt-6 flex items-center justify-between">
+              <button onclick="copyToClipboard('assignmentResult')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Outline
+              </button>
+              <button onclick="document.getElementById('assignmentForm').dispatchEvent(new Event('submit'))" class="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Regenerate
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUIZ GENERATOR TAB -->
+      <section id="tab-quiz" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="brain-circuit" class="text-purple-400"></i> Quiz Generator
+            </h2>
+            <p class="text-slate-400 text-sm">Interactive custom multiple choice tests with instant scoring and explanations.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div id="quizSetupView" class="max-w-2xl mx-auto glass-card rounded-2xl p-6 sm:p-8 border border-slate-800">
+          <form id="quizForm" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Subject *</label>
+              <input type="text" id="quizSubject" placeholder="e.g. World War II, World History" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition" required>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Specific Topic *</label>
+              <input type="text" id="quizTopic" placeholder="e.g. The Battle of Midway" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition" required>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Number of Questions</label>
+                <select id="quizNum" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
+                  <option value="5" selected>5 Questions</option>
+                  <option value="10">10 Questions</option>
+                  <option value="15">15 Questions</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Difficulty Level</label>
+                <select id="quizDiff" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
+                  <option value="Easy">Easy</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pt-4">
+              <button type="submit" id="quizSubmitBtn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20">
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i> Generate & Start Quiz
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Quiz Playing View -->
+        <div id="quizActiveView" class="hidden max-w-3xl mx-auto space-y-6">
+          <div class="glass-card rounded-2xl p-4 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span id="quizBadge" class="text-xs font-bold text-purple-400 uppercase tracking-wider">Quiz Mode</span>
+              <h3 id="quizTitleDisplay" class="text-base font-bold text-white">Topic Title</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400">Progress</span>
+              <p id="quizProgressText" class="text-sm font-bold text-white">Question 1 of 5</p>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="quizProgressBar" class="bg-purple-500 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+          </div>
+
+          <div id="quizQuestionsContainer" class="space-y-6"></div>
+
+          <div class="flex justify-between items-center pt-4">
+            <button onclick="resetQuizView()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+              Cancel Quiz
+            </button>
+            <button id="submitAnswersBtn" onclick="gradeQuiz()" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-purple-500/20 transition">
+              Submit Answers
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Results View -->
+        <div id="quizResultsView" class="hidden max-w-3xl mx-auto space-y-6">
+          <div class="glass-card rounded-2xl p-8 border border-slate-800 text-center space-y-4">
+            <div class="w-20 h-20 rounded-full bg-purple-500/10 border-2 border-purple-500/30 flex items-center justify-center mx-auto text-purple-400 text-2xl font-black" id="scoreCircle">
+              0%
+            </div>
+            <h3 class="text-2xl font-bold text-white" id="scoreTitle">Quiz Completed!</h3>
+            <p class="text-slate-400 text-sm max-w-md mx-auto" id="scoreSummary">Calculating performance analysis...</p>
+            
+            <div class="flex justify-center gap-4 pt-4">
+              <button onclick="restartCurrentQuiz()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Retry Quiz
+              </button>
+              <button onclick="resetQuizView()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> New Quiz Topic
+              </button>
+            </div>
+          </div>
+
+          <div id="quizDetailedReview" class="space-y-4"></div>
+        </div>
+      </section>
+
+      <!-- PRESENTATION HELPER TAB -->
+      <section id="tab-presentation" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="presentation" class="text-rose-400"></i> Presentation Helper
+            </h2>
+            <p class="text-slate-400 text-sm">Generate slide outlines, conversational speaker notes, and sample audience Q&A.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 h-fit">
+            <form id="presForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Presentation Topic *</label>
+                <input type="text" id="presTopic" placeholder="e.g. Renewable Energy Innovations" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500 transition" required>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Slide Count</label>
+                  <select id="presSlides" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500 transition">
+                    <option value="5 Slides (Short)">5 Slides</option>
+                    <option value="8 Slides (Standard)" selected>8 Slides</option>
+                    <option value="12 Slides (Detailed)">12 Slides</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Duration</label>
+                  <select id="presDuration" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500 transition">
+                    <option value="5 Minutes">5 Mins</option>
+                    <option value="10 Minutes" selected>10 Mins</option>
+                    <option value="20 Minutes">20 Mins</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Audience Level</label>
+                <select id="presAudience" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500 transition">
+                  <option value="General Public / Classmates">Classmates / General</option>
+                  <option value="Academic Panel / Professors" selected>Academic Panel / Professors</option>
+                  <option value="Industry Professionals">Industry Professionals</option>
+                </select>
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" id="presSubmitBtn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Presentation Deck
+                </button>
+                <button type="button" onclick="clearForm('presForm', 'presResult')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 min-h-[400px] flex flex-col justify-between">
+            <div id="presResult" class="prose prose-invert max-w-none text-slate-300 text-sm space-y-4">
+              <div class="text-center py-20 text-slate-500">
+                <i data-lucide="presentation" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p class="font-medium">Enter your presentation topic and slide preferences to build talking points.</p>
+              </div>
+            </div>
+            <div id="presActions" class="hidden border-t border-slate-800 pt-4 mt-6 flex items-center justify-between">
+              <button onclick="copyToClipboard('presResult')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Deck Details
+              </button>
+              <button onclick="document.getElementById('presForm').dispatchEvent(new Event('submit'))" class="text-xs text-rose-400 hover:underline flex items-center gap-1">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Regenerate
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDY PLANNER TAB -->
+      <section id="tab-planner" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="calendar" class="text-emerald-400"></i> Study Planner
+            </h2>
+            <p class="text-slate-400 text-sm">Generate structured study timetables complete with study sessions, breaks, and revisions.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 h-fit">
+            <form id="plannerForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Subjects & Key Topics *</label>
+                <textarea id="planSubjects" rows="3" placeholder="e.g. Calculus (Integration), Physics (Thermodynamics), History (Cold War)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition" required></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Exam Date *</label>
+                  <input type="date" id="planExamDate" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition" required>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Daily Hours</label>
+                  <select id="planHours" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+                    <option value="2 Hours">2 Hours/day</option>
+                    <option value="4 Hours" selected>4 Hours/day</option>
+                    <option value="6 Hours">6 Hours/day</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Priority / Hardest Subject</label>
+                <input type="text" id="planPriority" placeholder="e.g. Calculus needs extra focus" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" id="plannerSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Build Schedule
+                </button>
+                <button type="button" onclick="clearForm('plannerForm', 'plannerResult')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 min-h-[400px] flex flex-col justify-between overflow-x-auto">
+            <div id="plannerResult" class="prose prose-invert max-w-none text-slate-300 text-sm space-y-4">
+              <div class="text-center py-20 text-slate-500">
+                <i data-lucide="calendar-check-2" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p class="font-medium">Enter your subjects and study time to create an optimized study plan.</p>
+              </div>
+            </div>
+            <div id="plannerActions" class="hidden border-t border-slate-800 pt-4 mt-6 flex items-center justify-between">
+              <button onclick="copyToClipboard('plannerResult')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Schedule
+              </button>
+              <button onclick="document.getElementById('plannerForm').dispatchEvent(new Event('submit'))" class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Regenerate
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CODING HELPER TAB -->
+      <section id="tab-coding" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="code-2" class="text-cyan-400"></i> Coding Helper
+            </h2>
+            <p class="text-slate-400 text-sm">Understand code logic, syntax errors, and practice fundamental programming topics.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 h-fit">
+            <form id="codingForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Language / Tech Stack</label>
+                <select id="codeLang" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 transition">
+                  <option value="Python" selected>Python</option>
+                  <option value="Java">Java</option>
+                  <option value="JavaScript">JavaScript</option>
+                  <option value="PHP">PHP</option>
+                  <option value="SQL">SQL</option>
+                  <option value="HTML/CSS">HTML / CSS</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Question or Snippet to Explain *</label>
+                <textarea id="codePrompt" rows="5" placeholder="Paste snippet or enter question (e.g. How do list comprehensions work in Python?)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-100 focus:outline-none focus:border-cyan-500 transition" required></textarea>
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" id="codingSubmitBtn" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Explain & Debug
+                </button>
+                <button type="button" onclick="clearForm('codingForm', 'codingResult')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition">
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 min-h-[400px] flex flex-col justify-between">
+            <div id="codingResult" class="prose prose-invert max-w-none text-slate-300 text-sm space-y-4">
+              <div class="text-center py-20 text-slate-500">
+                <i data-lucide="file-code" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p class="font-medium">Enter code snippets or programming questions to receive beginner-friendly explanations.</p>
+              </div>
+            </div>
+            <div id="codingActions" class="hidden border-t border-slate-800 pt-4 mt-6 flex items-center justify-between">
+              <button onclick="copyToClipboard('codingResult')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Code Analysis
+              </button>
+              <button onclick="document.getElementById('codingForm').dispatchEvent(new Event('submit'))" class="text-xs text-cyan-400 hover:underline flex items-center gap-1">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Regenerate
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // App Navigation & Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleMobileMenu() {
+      sidebar.classList.toggle('-translate-x-full');
+      sidebarOverlay.classList.toggle('hidden');
+    }
+
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+      sidebarOverlay.addEventListener('click', toggleMobileMenu);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      const activeTab = document.getElementById(`tab-${tabId}`);
+      if (activeTab) activeTab.classList.remove('hidden');
+
+      // Update Nav Buttons State
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-sky-400 bg-sky-500/10 border border-sky-500/20";
+        } else {
+          btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition";
+        }
+      });
+
+      // Close mobile menu if open
+      if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+        toggleMobileMenu();
+      }
+    }
+
+    // Helper Toast Notification
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = message;
+      if (isError) {
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+        toastIcon.className = "w-5 h-5 text-rose-400";
+      } else {
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+        toastIcon.className = "w-5 h-5 text-emerald-400";
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    function copyToClipboard(containerId) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const text = el.innerText;
+      
+      // Fallback copy logic
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch (err) {
+        showToast('Failed to copy text', true);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function clearForm(formId, resultId) {
+      document.getElementById(formId).reset();
+      const res = document.getElementById(resultId);
+      if (res) {
+        res.innerHTML = `
+          <div class="text-center py-20 text-slate-500">
+            <i data-lucide="info" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+            <p class="font-medium">Form cleared. Submit new details to generate content.</p>
+          </div>`;
+        lucide.createIcons();
+      }
+      const actionsId = resultId.replace('Result', 'Actions');
+      const actionsEl = document.getElementById(actionsId);
+      if (actionsEl) actionsEl.classList.add('hidden');
+    }
+
+    async function callGemini(userPrompt, systemInstruction = "", responseSchema = null) {
+      const apiKey = ""; // Canvas runtime provides key when left empty
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: userPrompt }] }],
+        systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined
+      };
+
+      if (responseSchema) {
+        payload.generationConfig = {
+          responseMimeType: "application/json",
+          responseSchema: responseSchema
+        };
+      }
+
+      let retries = 3;
+      let delay = 1000;
+
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP Error ${response.status}`);
+          }
+
+          const data = await response.json();
+          const candidate = data.candidates?.[0];
+          if (candidate && candidate.content?.parts?.[0]?.text) {
+            return candidate.content.parts[0].text;
+          } else {
+            throw new Error("Invalid structure returned from Gemini");
+          }
+        } catch (err) {
+          if (i === retries - 1) throw err;
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    function showLoading(containerId, message = "Generating AI Response...") {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 space-y-4">
+          <div class="relative">
+            <div class="w-12 h-12 rounded-full border-4 border-slate-800 border-t-sky-400 animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <i data-lucide="sparkles" class="w-5 h-5 text-sky-400 animate-pulse"></i>
+            </div>
+          </div>
+          <p class="text-slate-300 font-medium text-sm animate-pulse">${message}</p>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    document.getElementById('studyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('studySubject').value.trim();
+      const topic = document.getElementById('studyTopic').value.trim();
+      const level = document.getElementById('studyLevel').value;
+      const style = document.getElementById('studyStyle').value;
+
+      if (!subject || !topic) {
+        showToast('Please fill out both Subject and Topic fields.', true);
+        return;
+      }
+
+      showLoading('studyResult', 'Analyzing topic and crafting revision notes...');
+
+      const prompt = `Topic: ${topic}\nSubject: ${subject}\nLevel: ${level}\nStyle: ${style}`;
+      const systemInstruction = `You are a world-class academic study assistant. Provide a structured guide for students in Markdown format.
+You MUST include the following explicit sections formatted with Markdown H3 headers:
+### 💡 Simple Explanation
+(A brief explanation tailored to ${level} level)
+
+### 🔑 Important Concepts & Key Terms
+(Bulleted list of core concepts and definitions)
+
+### 🌍 Real-World Example
+(An intuitive example)
+
+### 📌 Revision Notes
+(Short bullet points for quick review)
+
+### 📝 Practice Questions
+(Provide 5 practice questions for self-assessment)`;
+
+      try {
+        const markdown = await callGemini(prompt, systemInstruction);
+        document.getElementById('studyResult').innerHTML = marked.parse(markdown);
+        document.getElementById('studyActions').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('studyResult').innerHTML = `<p class="text-rose-400 p-4">Error generating study notes. Please try again.</p>`;
+        showToast('Generation failed.', true);
+      }
+    });
+
+    document.getElementById('assignmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('assignSubject').value.trim();
+      const topic = document.getElementById('assignTopic').value.trim();
+      const length = document.getElementById('assignLength').value;
+      const level = document.getElementById('assignLevel').value;
+      const style = document.getElementById('assignStyle').value;
+
+      if (!subject || !topic) {
+        showToast('Please complete required fields.', true);
+        return;
+      }
+
+      showLoading('assignmentResult', 'Drafting assignment outline & argument structure...');
+
+      const prompt = `Subject: ${subject}\nAssignment Topic: ${topic}\nTarget Length: ${length}\nLevel: ${level}\nStyle: ${style}`;
+      const systemInstruction = `You are an academic writing coach. Generate a complete structural outline and academic guide for an assignment in Markdown. Do not invent fake citations.
+Include the following Markdown headers:
+### 1. Introduction & Context
+### 2. Main Discussion Sections (with subheadings)
+### 3. Key Arguments & Examples
+### 4. Pros and Cons / Critical Evaluation
+### 5. Conclusion
+### 6. Suggested Learning Resources & Topics`;
+
+      try {
+        const markdown = await callGemini(prompt, systemInstruction);
+        document.getElementById('assignmentResult').innerHTML = marked.parse(markdown);
+        document.getElementById('assignmentActions').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('assignmentResult').innerHTML = `<p class="text-rose-400 p-4">Error generating assignment guide. Please try again.</p>`;
+        showToast('Generation failed.', true);
+      }
+    });
+
+    let currentQuizQuestions = [];
+    let userQuizAnswers = {};
+
+    document.getElementById('quizForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('quizSubject').value.trim();
+      const topic = document.getElementById('quizTopic').value.trim();
+      const num = parseInt(document.getElementById('quizNum').value, 10);
+      const difficulty = document.getElementById('quizDiff').value;
+
+      if (!subject || !topic) {
+        showToast('Please fill out Subject and Topic for the quiz.', true);
+        return;
+      }
+
+      document.getElementById('quizSetupView').classList.add('hidden');
+      document.getElementById('quizActiveView').classList.remove('hidden');
+      document.getElementById('quizResultsView').classList.add('hidden');
+      
+      showLoading('quizQuestionsContainer', 'Generating interactive multiple-choice questions...');
+
+      const prompt = `Generate a ${difficulty} difficulty multiple choice quiz with exactly ${num} questions on "${topic}" in subject "${subject}".`;
+      const systemInstruction = `You are a quiz authoring AI. Return a structured JSON array of questions.`;
+
+      const quizSchema = {
+        type: "ARRAY",
+        items: {
+          type: "OBJECT",
+          properties: {
+            question: { type: "STRING" },
+            options: {
+              type: "ARRAY",
+              items: { type: "STRING" }
+            },
+            correctIndex: { type: "INTEGER" },
+            explanation: { type: "STRING" }
+          },
+          propertyOrdering: ["question", "options", "correctIndex", "explanation"]
+        }
+      };
+
+      try {
+        const jsonStr = await callGemini(prompt, systemInstruction, quizSchema);
+        currentQuizQuestions = JSON.parse(jsonStr);
+        userQuizAnswers = {};
+        renderActiveQuiz(topic);
+      } catch (err) {
+        document.getElementById('quizQuestionsContainer').innerHTML = `<p class="text-rose-400 text-center p-4">Failed to build quiz questions. Please return and try again.</p>`;
+        showToast('Quiz generation error.', true);
+      }
+    });
+
+    function renderActiveQuiz(topicTitle) {
+      document.getElementById('quizTitleDisplay').innerText = topicTitle;
+      document.getElementById('quizProgressText').innerText = `Question 1 of ${currentQuizQuestions.length}`;
+      document.getElementById('quizProgressBar').style.width = `0%`;
+
+      const container = document.getElementById('quizQuestionsContainer');
+      container.innerHTML = '';
+
+      currentQuizQuestions.forEach((q, idx) => {
+        const qCard = document.createElement('div');
+        qCard.className = "glass-card rounded-2xl p-6 border border-slate-800 space-y-4";
+        qCard.innerHTML = `
+          <div class="flex items-start gap-3">
+            <span class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 font-bold text-xs flex items-center justify-center shrink-0 border border-purple-500/20">${idx + 1}</span>
+            <p class="text-base font-semibold text-white leading-snug">${q.question}</p>
+          </div>
+          <div class="grid grid-cols-1 gap-2.5 pt-2">
+            ${q.options.map((opt, oIdx) => `
+              <button type="button" onclick="selectQuizOption(${idx}, ${oIdx})" id="opt-${idx}-${oIdx}" class="quiz-opt-btn-${idx} w-full text-left p-3.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 text-sm text-slate-300 transition flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full border border-slate-700 flex items-center justify-center text-xs font-medium text-slate-400 shrink-0">${String.fromCharCode(65 + oIdx)}</span>
+                <span>${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(qCard);
+      });
+    }
+
+    function selectQuizOption(qIdx, optionIdx) {
+      userQuizAnswers[qIdx] = optionIdx;
+
+      // Update styling
+      document.querySelectorAll(`.quiz-opt-btn-${qIdx}`).forEach((btn, idx) => {
+        if (idx === optionIdx) {
+          btn.className = `quiz-opt-btn-${qIdx} w-full text-left p-3.5 rounded-xl bg-purple-500/20 border-2 border-purple-500 text-sm text-white transition flex items-center gap-3 font-medium`;
+        } else {
+          btn.className = `quiz-opt-btn-${qIdx} w-full text-left p-3.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 text-sm text-slate-300 transition flex items-center gap-3`;
+        }
+      });
+
+      // Update progress bar
+      const answeredCount = Object.keys(userQuizAnswers).length;
+      const pct = Math.round((answeredCount / currentQuizQuestions.length) * 100);
+      document.getElementById('quizProgressBar').style.width = `${pct}%`;
+      document.getElementById('quizProgressText').innerText = `${answeredCount} of ${currentQuizQuestions.length} Answered`;
+    }
+
+    function gradeQuiz() {
+      if (Object.keys(userQuizAnswers).length < currentQuizQuestions.length) {
+        if (!confirm("You have unanswered questions. Are you sure you want to submit?")) return;
+      }
+
+      let correctCount = 0;
+      const detailedContainer = document.getElementById('quizDetailedReview');
+      detailedContainer.innerHTML = '';
+
+      currentQuizQuestions.forEach((q, idx) => {
+        const selectedOpt = userQuizAnswers[idx];
+        const isCorrect = selectedOpt === q.correctIndex;
+        if (isCorrect) correctCount++;
+
+        const card = document.createElement('div');
+        card.className = `glass-card rounded-2xl p-6 border ${isCorrect ? 'border-emerald-500/30' : 'border-rose-500/30'} space-y-3`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isCorrect ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
+              ${isCorrect ? 'Correct' : 'Incorrect'}
+            </span>
+            <span class="text-xs text-slate-500">Question ${idx + 1}</span>
+          </div>
+          <p class="font-semibold text-white text-sm">${q.question}</p>
+          <div class="space-y-1.5 text-xs">
+            <p class="text-slate-400">Your Answer: <span class="${isCorrect ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}">${selectedOpt !== undefined ? q.options[selectedOpt] : 'Not Answered'}</span></p>
+            ${!isCorrect ? `<p class="text-slate-400">Correct Answer: <span class="text-emerald-400 font-semibold">${q.options[q.correctIndex]}</span></p>` : ''}
+          </div>
+          <p class="text-xs text-slate-400 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 leading-relaxed">${q.explanation}</p>
+        `;
+        detailedContainer.appendChild(card);
+      });
+
+      const scorePct = Math.round((correctCount / currentQuizQuestions.length) * 100);
+      document.getElementById('scoreCircle').innerText = `${scorePct}%`;
+      document.getElementById('scoreTitle').innerText = scorePct >= 70 ? "Great Job! 🎉" : "Needs Revision 📚";
+      document.getElementById('scoreSummary').innerText = `You scored ${correctCount} out of ${currentQuizQuestions.length} questions correctly. Review the detailed feedback below to master this topic.`;
+
+      document.getElementById('quizActiveView').classList.add('hidden');
+      document.getElementById('quizResultsView').classList.remove('hidden');
+    }
+
+    function restartCurrentQuiz() {
+      userQuizAnswers = {};
+      document.getElementById('quizResultsView').classList.add('hidden');
+      document.getElementById('quizActiveView').classList.remove('hidden');
+      renderActiveQuiz(document.getElementById('quizTopic').value);
+    }
+
+    function resetQuizView() {
+      document.getElementById('quizForm').reset();
+      document.getElementById('quizSetupView').classList.remove('hidden');
+      document.getElementById('quizActiveView').classList.add('hidden');
+      document.getElementById('quizResultsView').classList.add('hidden');
+    }
+
+    document.getElementById('presForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const topic = document.getElementById('presTopic').value.trim();
+      const slides = document.getElementById('presSlides').value;
+      const duration = document.getElementById('presDuration').value;
+      const audience = document.getElementById('presAudience').value;
+
+      if (!topic) {
+        showToast('Please enter a presentation topic.', true);
+        return;
+      }
+
+      showLoading('presResult', 'Structuring presentation deck & speaker notes...');
+
+      const prompt = `Topic: ${topic}\nSlides requested: ${slides}\nTarget Duration: ${duration}\nAudience Level: ${audience}`;
+      const systemInstruction = `You are a presentation coach. Output a presentation structure in Markdown.
+For EACH slide include:
+### Slide [Number]: [Title]
+- **Key Points:**
+- **Conversational Speaker Notes:** (write naturally as if spoken aloud)
+- **Slide Transition Suggestion:**
+
+Conclude with a section:
+### 🎤 Anticipated Q&A (3 Likely Questions & Answers)`;
+
+      try {
+        const markdown = await callGemini(prompt, systemInstruction);
+        document.getElementById('presResult').innerHTML = marked.parse(markdown);
+        document.getElementById('presActions').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('presResult').innerHTML = `<p class="text-rose-400 p-4">Error generating presentation plan. Please try again.</p>`;
+        showToast('Generation failed.', true);
+      }
+    });
+
+    document.getElementById('plannerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subjects = document.getElementById('planSubjects').value.trim();
+      const examDate = document.getElementById('planExamDate').value;
+      const hours = document.getElementById('planHours').value;
+      const priority = document.getElementById('planPriority').value.trim();
+
+      if (!subjects || !examDate) {
+        showToast('Please fill in subjects and target exam date.', true);
+        return;
+      }
+
+      showLoading('plannerResult', 'Constructing study schedule with break intervals...');
+
+      const prompt = `Subjects: ${subjects}\nExam Date: ${examDate}\nAvailable Study Time: ${hours}\nPriority / Notes: ${priority}`;
+      const systemInstruction = `You are an academic productivity consultant. Build a study schedule in Markdown.
+Use a Markdown Table for the primary timetable containing columns:
+| Day / Date | Subject & Topic | Session Type (Study/Revision/Practice) | Duration | Break |
+Followed by:
+### 💡 Study Strategy & Priorities
+### 📌 Daily Focus Tips`;
+
+      try {
+        const markdown = await callGemini(prompt, systemInstruction);
+        document.getElementById('plannerResult').innerHTML = marked.parse(markdown);
+        document.getElementById('plannerActions').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('plannerResult').innerHTML = `<p class="text-rose-400 p-4">Error generating study schedule. Please try again.</p>`;
+        showToast('Generation failed.', true);
+      }
+    });
+
+    document.getElementById('codingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const lang = document.getElementById('codeLang').value;
+      const codePrompt = document.getElementById('codePrompt').value.trim();
+
+      if (!codePrompt) {
+        showToast('Please enter code or a programming question.', true);
+        return;
+      }
+
+      showLoading('codingResult', 'Analyzing syntax & breaking down logic...');
+
+      const prompt = `Language: ${lang}\nInput Question / Code:\n${codePrompt}`;
+      const systemInstruction = `You are a friendly computer science instructor. Explain programming concepts clearly in Markdown.
+Include sections:
+### 💻 Simple Explanation & Breakdown
+### 🔍 Code Solution / Refactored Example (use fenced code blocks)
+### ⚠️ Common Pitfalls & Mistakes
+### 🎯 Practice Mini-Challenge`;
+
+      try {
+        const markdown = await callGemini(prompt, systemInstruction);
+        document.getElementById('codingResult').innerHTML = marked.parse(markdown);
+        document.getElementById('codingActions').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('codingResult').innerHTML = `<p class="text-rose-400 p-4">Error processing code request. Please try again.</p>`;
+        showToast('Generation failed.', true);
+      }
+    });
+  </script>
+</body>
+</html>
